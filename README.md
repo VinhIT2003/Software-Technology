@@ -106,7 +106,102 @@ Các nghiệp vụ quan trọng nhất bao gồm:
 - 🌟 Thành viên 2: 3121411060-Nguyễn Trí Đức: https://duc01ai.github.io/
 - ⚡ Thành viên 3: 3121411045-Đặng Nguyễn Quốc Dương: https://yonorikomana.github.io/DuongCV/
 - 🎯 Thành viên 4: 3121411100-Phạm Quang Khiêm: https://khiemne.github.io/khiempham1122.github.io/
+
+## ***📖  Chương 2: Đặc Tả Yêu Cầu Phần Mềm
+
+## 🔹 I. Mô Tả Yêu Cầu Khách Hàng (User Stories)
+**Laptop Vang** hướng đến việc xây dựng một hệ thống bán hàng trực tuyến chuyên nghiệp, tối ưu hóa **quy trình mua sắm, quản lý đơn hàng và kho hàng** một cách hiệu quả.
+
 ---
+
+## 🛒 1. Quy Trình Mua Sắm Của Khách Hàng
+Để bắt đầu mua sắm, khách hàng cần **đăng ký tài khoản** với đầy đủ thông tin cá nhân. Sau khi đăng ký thành công, khách hàng có thể **đăng nhập, duyệt sản phẩm, thêm vào giỏ hàng và tiến hành đặt hàng**.
+
+- ✅ Khách hàng có thể đặt **nhiều đơn hàng khác nhau**, mỗi đơn hàng có một **ID riêng** và chứa **nhiều sản phẩm** theo nhu cầu.
+- ✅ Khi đặt hàng, khách hàng phải **chọn phương thức thanh toán** và đảm bảo **nhập thông tin chính xác**.
+- ✅ Hệ thống sẽ **lưu trữ đơn hàng trong cơ sở dữ liệu** và chờ **admin xử lý**.
+
+---
+
+## 📂 2. Quản Lý Danh Mục & Sản Phẩm
+**Admin** chịu trách nhiệm **đăng tải và quản lý** thông tin sản phẩm trên hệ thống.
+
+### 📁 **Danh mục sản phẩm**
+- 🏷️ Mỗi sản phẩm thuộc về một **danh mục cụ thể** (ví dụ: Laptop Gaming, Laptop Văn Phòng…).
+- 🛠️ **Admin** có thể **thêm, chỉnh sửa hoặc xóa danh mục** khi cần thiết.
+
+### 💻 **Sản phẩm**
+- 🔑 Mỗi sản phẩm có **mã sản phẩm duy nhất**, tên, thông số kỹ thuật, giá bán và hình ảnh minh họa.
+- 🏷️ Đặc biệt, mỗi sản phẩm có **nhiều chiếc khác nhau**, mỗi chiếc có **mã IMEI riêng** để phân biệt.
+- 🛒 Khi hàng hóa được cập nhật lên hệ thống, **khách hàng có thể xem chi tiết và đặt mua**.
+
+---
+
+## 📦 3. Quản Lý Đơn Hàng & Xử Lý Giao Dịch
+- 📝 **Admin** có toàn quyền theo dõi và xử lý các đơn hàng do khách hàng đặt.
+- ⏳ Khi khách hàng đặt hàng, đơn hàng sẽ có trạng thái **"Waiting" (Đang chờ xử lý)**.
+- ✅ Sau khi kiểm tra và xác nhận, **admin cập nhật trạng thái** thành **"Confirming" (Đã xử lý)**.
+- 🚫 Nếu khách hàng có hành vi **bom hàng từ 2 đơn trở lên**, tài khoản sẽ bị **xóa và cấm mua sắm vĩnh viễn**.
+
+### 📜 **Hóa đơn xuất hàng**
+Sau khi đơn hàng được xác nhận, **admin tiến hành tạo hóa đơn xuất hàng**, bao gồm:
+- 🆔 **Mã phiếu xuất**,
+- 🛡️ **Mã quản trị viên phụ trách**,
+- 👤 **Thông tin khách hàng**,
+- 📦 **Chi tiết sản phẩm** (*mã IMEI, giá gốc, giá sau khi áp dụng khuyến mãi*).
+
+### 🎁 **Chương trình khuyến mãi**
+Hệ thống hỗ trợ **mã khuyến mãi** để áp dụng các chương trình ưu đãi, chẳng hạn như:
+- 🎂 **Tri ân sinh nhật khách hàng**,
+- 🎉 **Kỷ niệm 10 năm thành lập công ty**,
+- 💰 **Giảm giá cho khách hàng thân thiết**.
+
+---
+
+## 🏪 4. Quản Lý Nhập Hàng & Kho Hàng
+**Laptop Vang** chỉ có **một kho trung tâm** để quản lý toàn bộ hàng hóa.
+
+- 📊 Khi hàng sắp hết, **admin kiểm tra số lượng tồn kho** và **tạo phiếu nhập hàng để bổ sung**.
+- 📞 **Admin liên hệ với nhà cung cấp** để đặt hàng theo danh mục sản phẩm.
+- 📦 Mỗi lô hàng nhập về sẽ chứa **nhiều sản phẩm** thuộc danh mục tương ứng.
+- 🔍 Từng sản phẩm trong kho sẽ được **quản lý theo mã IMEI**, giúp phân biệt ngay cả khi cùng model.
+
+📢 Sau khi **nhập hàng thành công**, admin **cập nhật dữ liệu lên hệ thống** để sản phẩm sẵn sàng cho khách hàng đặt mua.
+
+---
+
+## 📊 5. Thống Kê Doanh Thu & Báo Cáo Kinh Doanh
+Hệ thống hỗ trợ **thống kê doanh thu** dựa trên dữ liệu **nhập hàng và xuất hàng**, giúp admin đánh giá **tình hình kinh doanh** và đề xuất **chiến lược phù hợp**.
+
+- 📈 Các báo cáo doanh thu sẽ được thể hiện qua **biểu đồ trực quan**, giúp admin dễ dàng theo dõi **xu hướng bán hàng**.
+- 📑 Dữ liệu được phân tích theo nhiều tiêu chí như:
+  - 🕒 **Thời gian**,
+  - 🏷️ **Danh mục sản phẩm**,
+  - 📦 **Số lượng đơn hàng**.  
+
+🛠️ Điều này giúp cửa hàng **đưa ra quyết định tối ưu hóa kinh doanh**.
+
+---
+
+## ✉️ 6. Tích Hợp Liên Hệ Khách Hàng Qua Email
+Hệ thống tích hợp tính năng **gửi email trực tiếp** đến khách hàng ngay trên nền tảng, giúp **admin liên hệ nhanh chóng** mà không cần đăng nhập vào email riêng.  
+
+📩 **Chức năng này giúp:**
+- ✅ **Xác nhận đơn hàng**,
+- 🎁 **Gửi thông báo khuyến mãi**,
+- 📞 **Hỗ trợ chăm sóc khách hàng**.
+
+---
+
+## 🎯 **Kết Luận**
+Với hệ thống quản lý bán hàng trực tuyến chuyên nghiệp, **Laptop Vang** cam kết mang lại:
+- 🚀 **Trải nghiệm mua sắm hiện đại**,
+- ✅ **Minh bạch trong quản lý đơn hàng**,
+- 🔥 **Tối ưu hiệu suất kinh doanh**,
+- 🤝 **Nâng cao chất lượng dịch vụ khách hàng**.
+
+---
+
 
 This is my website and also my group: https://vinhit2003.github.io/MyWebSite/
 
