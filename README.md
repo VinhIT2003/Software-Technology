@@ -34,7 +34,6 @@ Phần mềm quản lý bán hàng không chỉ hoạt động nội bộ mà c�
 - **Yếu tố pháp lý:** Tuân thủ quy định về bảo mật dữ liệu (GDPR, Nghị định 52/2013/NĐ-CP).
 - **Yếu tố thị trường:** Cạnh tranh, nhu cầu khách hàng, xu hướng tiêu dùng.
 
----
 
 ### II. Hiện trạng nghiệp vụ hệ thống
 
