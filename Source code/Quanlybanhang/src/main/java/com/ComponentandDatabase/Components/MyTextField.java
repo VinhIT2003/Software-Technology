@@ -11,6 +11,9 @@ public class MyTextField extends JPanel {
     private JTextField textField;
     private JPasswordField passwordField;
     private JLabel prefixIconLabel;
+    private Color textColor = Color.BLACK; // Giá trị mặc định
+    private boolean isLocked = false;
+
     private JButton eyeButton;
     private boolean isPasswordVisible = false;
     private String hint = "";
@@ -63,9 +66,8 @@ public class MyTextField extends JPanel {
         tf.setBorder(null);
         tf.setOpaque(true);
         tf.setBackground(getBackground()); // Lấy màu nền của JPanel
-        tf.setForeground(Color.BLACK);
         tf.setFont(new Font("Times New Roman", Font.PLAIN, 16));
-        tf.setMargin(new Insets(5, 5, 5, 5));
+        //tf.setMargin(new Insets(5, 5, 5, 5));
         return tf;
     }
 
@@ -84,7 +86,51 @@ public class MyTextField extends JPanel {
         textField.setFont(font);
         repaint();
     }
+    
+    public void setTextColor(Color color) {
+      this.textColor = color;
+      textField.setForeground(color);
 
+      if (passwordField != null) {
+          passwordField.setForeground(color);
+      }
+      repaint();
+  }
+
+    public void centerCaret() {
+        if (textField != null) {
+            // Đặt con trỏ ở giữa text (hoặc đầu nếu rỗng)
+            int pos = textField.getText().length() / 2;
+            textField.setCaretPosition(pos);
+
+            // Tính toán vị trí giữa màn hình
+            try {
+                // 1. Lấy kích thước hiển thị thực tế
+                Rectangle visibleRect = textField.getVisibleRect();
+                int centerX = visibleRect.x + visibleRect.width / 2;
+
+                // 2. Tạo vùng cần hiển thị (1 pixel ở giữa)
+                Rectangle targetRect = new Rectangle(
+                    centerX - 1,  // Vị trí X (giữa trừ 1 pixel)
+                    0,            // Vị trí Y
+                    2,            // Rộng 2 pixel để đảm bảo nhìn thấy
+                    visibleRect.height
+                );
+
+                // 3. Cuộn đến vị trí giữa
+                textField.scrollRectToVisible(targetRect);
+
+                // 4. Đảm bảo con trỏ nhấp nháy
+                textField.getCaret().setVisible(true);
+                textField.getCaret().setBlinkRate(500);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    
     public String getText() {
         return textField.getText();
     }
@@ -121,6 +167,34 @@ public class MyTextField extends JPanel {
         revalidate();
         repaint();
     }
+
+    public void setEditable(boolean editable) {
+        textField.setEditable(editable);
+
+        // (Tùy chọn) Thay đổi màu nền/giao diện để thể hiện trạng thái khóa
+        if (!editable) {
+            textField.setBackground(Color.LIGHT_GRAY); // Màu nền khi khóa
+        } else {
+            textField.setBackground(Color.WHITE); // Màu nền khi mở khóa
+        }
+    }
+           
+  public void setLocked(boolean locked) {
+    this.isLocked = locked;
+
+    textField.setEditable(!locked);      // Không cho sửa nếu bị lock
+    textField.setFocusable(!locked);     // Không focus được nếu bị lock
+    textField.setEnabled(true);          // Giữ enabled để không bị đổi màu
+    textField.setForeground(textColor);  // Giữ lại màu chữ đã chọn
+    textField.setBackground(locked ? new Color(240, 240, 240) : Color.WHITE);
+}
+
+ public void setTextAlignment(int alignment) {
+    textField.setHorizontalAlignment(alignment);  // Căn chỉnh văn bản
+    textField.setMargin(new Insets(0, 0, 0, 0)); // Đảm bảo không có margin (padding)
+}
+
+
 
     private JPasswordField createPasswordField(String hint) {
         return new JPasswordField() {

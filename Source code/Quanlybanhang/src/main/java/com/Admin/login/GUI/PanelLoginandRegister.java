@@ -8,9 +8,8 @@ import java.awt.CardLayout;
 import java.awt.Font;
 import java.awt.Color;
 import com.ComponentandDatabase.Database_Connection.DatabaseConnection;
-import com.Admin.login.Control.ControlRegister;
-import com.Admin.login.Control.ControlLogin;
-import com.Admin.dashboard_admin.Dashboard_ad;
+import com.Admin.login.BUS.BusAccount_ad;
+import com.Admin.dashboard_admin.GUI.Dashboard_ad;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
@@ -32,16 +31,14 @@ public class PanelLoginandRegister extends javax.swing.JLayeredPane {
     private JRadioButton rdoFemale;
     private JDateChooser dateOfBirth;
     private MyTextField txtEmail;
-    private MyTextField txtEmailLogin;
+    public static MyTextField txtIDLogin;
     private MyTextField txtContact;
     private JTextArea txtAddress;
     private MyTextField txtPassword;
     private MyTextField txtPasswordLogin;
     private ButtonGroup genderGroup;
     private DatabaseConnection db;
-    private ControlRegister ControlRegister;
-    private ControlLogin ControlLogin;
-    private CustomDialog cs;
+    private BusAccount_ad busAccount;
     private static int mouseX, mouseY; // Biến lưu vị trí chuột
 
     public PanelLoginandRegister() {
@@ -52,6 +49,7 @@ public class PanelLoginandRegister extends javax.swing.JLayeredPane {
         register.setVisible(false);
       
     }
+    
     private void initRegister() {
         // Đặt layout của panel là null (không sử dụng layout manager)
         register.setLayout(null);
@@ -99,7 +97,7 @@ public class PanelLoginandRegister extends javax.swing.JLayeredPane {
         txtFullName.setTextFont(new Font("Times new roman", Font.PLAIN, 16));
         txtFullName.setHint("Enter your full name");
         txtFullName.setBorder(BorderFactory.createLineBorder(new Color(7, 164, 121), 2));
-        txtFullName.setPreFixIcon("D:\\Đồ án Java\\Quanlybanhang\\src\\main\\resources\\Icons\\User_icon\\mail.png");
+        txtFullName.setPreFixIcon("D:\\Đồ án Java\\Quanlybanhang\\src\\main\\resources\\Icons\\User_icon\\full name.png");
         // Đặt tọa độ và kích thước cho MyTextField
         txtFullName.setBounds(160, 170, 220, 35);
         register.add(txtFullName);
@@ -130,22 +128,6 @@ public class PanelLoginandRegister extends javax.swing.JLayeredPane {
         genderGroup.add(rdoMale);
         genderGroup.add(rdoFemale);
         
-//        // Tạo label "DOB"
-//       JLabel lblDOB = new JLabel("Date of Birth");
-//       lblDOB.setFont(new Font("goudy old style", Font.PLAIN, 20));
-//       lblDOB.setForeground(Color.BLACK);
-//       lblDOB.setBounds(60,300, 120, 30); // Đặt vị trí bên trái MyTextField
-//       register.add(lblDOB);
-////
-//                // Tạo JDateChooser
-//         dateOfBirth = new JDateChooser();
-//         dateOfBirth.setFont(new Font("Times New Roman", Font.PLAIN, 18));
-//         dateOfBirth.setDateFormatString("dd/MM/yyyy");  // Định dạng ngày theo kiểu dd/MM/yyyy
-//         dateOfBirth.setBounds(180, 295, 180, 35);
-//         dateOfBirth.setBackground(Color.WHITE);
-//
-//         // Thêm JDateChooser vào panel register (thay vì add(dateChooser))
-//         register.add(dateOfBirth);
          
               // Tạo label "Email"
        JLabel lblEmail = new JLabel("Email");
@@ -250,8 +232,8 @@ public class PanelLoginandRegister extends javax.swing.JLayeredPane {
         signup.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ControlRegister = new ControlRegister();
-                ControlRegister.registerCustomer(
+                busAccount= new BusAccount_ad();
+                busAccount.registerAd(
                     txtIDCard.getText().trim(),
                     txtFullName.getText().trim(),
                     rdoMale.isSelected() ? "Male" : (rdoFemale.isSelected() ? "Female" : ""),
@@ -264,8 +246,8 @@ public class PanelLoginandRegister extends javax.swing.JLayeredPane {
         });
         
     }
-    
-        private void initLogin(){
+ 
+       private void initLogin(){
       // Đặt layout của panel là null (không sử dụng layout manager)
             login.setLayout(null);
 
@@ -279,15 +261,15 @@ public class PanelLoginandRegister extends javax.swing.JLayeredPane {
             login.add(label_title);
             
              // Tạo đối tượng MyTextField email
-            txtEmailLogin = new MyTextField();
-            txtEmailLogin.setTextFont(new Font("Times New Roman", Font.PLAIN, 16));
-            txtEmailLogin.setHint("ID");
-            txtEmailLogin.setPreFixIcon("D:\\Đồ án Java\\Quanlybanhang\\src\\main\\resources\\Icons\\User_icon\\mail.png");
+            txtIDLogin = new MyTextField();
+            txtIDLogin.setTextFont(new Font("Times New Roman", Font.PLAIN, 16));
+            txtIDLogin.setHint("ID");
+            txtIDLogin.setPreFixIcon("D:\\Đồ án Java\\Quanlybanhang\\src\\main\\resources\\Icons\\User_icon\\mail.png");
 
-            txtEmailLogin.setBorder(null);
-            txtEmailLogin.setBackgroundColor(Color.decode("#E0F2E9")); // ✅ Gọi hàm mới để đổi màu
-            txtEmailLogin.setBounds(100, 260, 280, 35);
-            login.add(txtEmailLogin);
+            txtIDLogin.setBorder(null);
+            txtIDLogin.setBackgroundColor(Color.decode("#E0F2E9")); // ✅ Gọi hàm mới để đổi màu
+            txtIDLogin.setBounds(100, 260, 280, 35);
+            login.add(txtIDLogin);
 
              // Tạo đối tượng MyTextField password
             txtPasswordLogin = new MyTextField();
@@ -322,9 +304,28 @@ public class PanelLoginandRegister extends javax.swing.JLayeredPane {
         forget.setHoverColor(new Color(220, 220, 220)); // Màu xám sáng khi rê chuột vào
         forget.setBounds(150, 390, 200, 35);
         forget.setFont(new Font("Times New Roman", Font.BOLD | Font.ITALIC, 16));
-
         forget.setForeground(new Color(0, 150, 136)); // Màu chữ xanh đậm để dễ nhìn
+     
+        forget.addActionListener((e) -> {
+            String admin_id = txtIDLogin.getText().strip();
 
+            if (admin_id.isEmpty()) {
+              CustomDialog.showError("Please enter your Admin ID before proceeding!");
+                return; // không thực hiện tiếp
+            }
+
+            busAccount = new BusAccount_ad();
+            String sentOtp = busAccount.sentOTP(admin_id);
+
+            if (sentOtp != null) {
+                OTPFrame OTP = new OTPFrame();
+                OTP.setVisible(true);
+            } else {
+                CustomDialog.showError("Failed to send OTP. Please check your Admin ID or try again later.");
+            }
+        });
+
+       
         // Thêm vào panel
         login.add(forget);
         
@@ -337,25 +338,23 @@ public class PanelLoginandRegister extends javax.swing.JLayeredPane {
         signin.setFont(new Font("Times New Roman", Font.BOLD, 18));
         signin.setForeground(Color.WHITE);
         
-        ControlLogin= new ControlLogin();
         signin.addActionListener(e -> {
-    String id = txtEmailLogin.getText().trim();
-    String password = txtPasswordLogin.getPasswordText().trim();
+            String id = txtIDLogin.getText().trim();
+            String password = txtPasswordLogin.getPasswordText().trim();
+            busAccount= new BusAccount_ad();
+            if (busAccount.login(id, password)) {
+                String name = busAccount.getName();
+                CustomDialog.showSuccess("Welcome " + name + "!");
 
-    if (ControlLogin.loginCustomer(id, password)) {
-        String name = ControlLogin.getAdminName();
-        cs.showSuccess("Welcome " + name);
-     
 
-        JFrame loginFrame = (JFrame) SwingUtilities.getWindowAncestor(signin);
-        loginFrame.setVisible(false); // hoặc dispose nếu không cần
+                JFrame loginFrame = (JFrame) SwingUtilities.getWindowAncestor(signin);
+                loginFrame.setVisible(false); // hoặc dispose nếu không cần
 
-        Dashboard_ad dashboard = new Dashboard_ad();
-        dashboard.setVisible(true);
-        dashboard.repaint();
-    }
-});
-
+                Dashboard_ad dashboard = new Dashboard_ad(id);
+                dashboard.setVisible(true);
+                dashboard.repaint();
+            }
+        });
 
 
         login.add(signin);
@@ -374,6 +373,8 @@ public class PanelLoginandRegister extends javax.swing.JLayeredPane {
             register.setVisible(true);
         }      
  }
+  
+  
      
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents

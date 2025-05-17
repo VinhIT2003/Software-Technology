@@ -5,11 +5,16 @@ import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Dimension;
+import javax.swing.table.DefaultTableModel;
+import java.text.SimpleDateFormat;
+import java.util.List;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.table.JTableHeader;
-
+import com.Admin.customer.BUS.BusCustomer;
 import javax.swing.tree.*;
+import com.Admin.customer.BUS.BusCustomer;
+import com.Admin.customer.DTO.DTOCustomer;
 import javax.swing.table.DefaultTableModel;
 import com.ComponentandDatabase.Components.MyTable;
 import com.ComponentandDatabase.Components.MyCombobox;
@@ -18,7 +23,9 @@ import com.ComponentandDatabase.Components.MyPanel;
 import com.ComponentandDatabase.Components.MyButton;
 import com.ComponentandDatabase.Components.MyTreeview;
 import com.ComponentandDatabase.Components.CustomDialog;
-import com.Admin.customer.Control.ControlCustomer;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 import javax.swing.*;
 
 public class Form_Customer extends JPanel {
@@ -29,8 +36,9 @@ public class Form_Customer extends JPanel {
     private MyCombobox<String> cmbSearch, cmbStatus;
     private JPanel panelSearch;
     private MyButton bntSearch, bntRefresh, bntDelete, bntExportfile, bntUpdate;
-    private MyTreeview treeRefine;
-    public ControlCustomer control;
+    private BusCustomer busCustomer;
+    private DefaultTableModel model;
+
     public Form_Customer() {
         initComponents();
         init();
@@ -56,11 +64,8 @@ public class Form_Customer extends JPanel {
         };
 
         // 2️⃣ Tạo model
-        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+        model = new DefaultTableModel(columnNames, 0);
 
-        // 3️⃣ Khởi tạo ControlCustomer
-        control = new ControlCustomer();
-        control.setModel(model);
 
         // 4️⃣ Định dạng font
         Font contentFont = new Font("Times New Roman", Font.PLAIN, 15);
@@ -94,10 +99,23 @@ public class Form_Customer extends JPanel {
 
         // 🔟 Load dữ liệu vào model sau khi GUI sẵn sàng
         SwingUtilities.invokeLater(() -> {
-            control.showCustomer();
+            loadCustomerData(model);
             Customner.adjustColumnWidths(); // 👈 Gọi sau khi dữ liệu đã được load
         });
 
+           // Bắt sự kiện chọn dòng trong bảng để set giá trị vào combobox State
+       Customner.addMouseListener(new MouseAdapter() {
+           @Override
+           public void mouseClicked(MouseEvent e) {
+               int selectedRow = Customner.getSelectedRow();
+               if (selectedRow != -1) {
+                   String stateValue = Customner.getValueAt(selectedRow, 7).toString();
+
+                   // Đưa giá trị lên combobox
+                   cmbStatus.setSelectedItem(stateValue);
+               }
+           }
+       });
       
     
          // Tạo panelSearch với màu nền trắng
@@ -153,13 +171,39 @@ public class Form_Customer extends JPanel {
             bntSearch.setForeground(Color.WHITE);
             bntSearch.setButtonIcon("D:\\Đồ án Java\\Quanlybanhang\\src\\main\\resources\\Icons\\Admin_icon\\search.png", 25, 25, 5, SwingConstants.RIGHT, SwingConstants.CENTER);    
             bntSearch.setBounds(txtSearch.getX() + txtSearch.getWidth() + 10, 10, 120, 35);
-            bntSearch.addActionListener(e -> {
-            try {
-                control.searchCustomer(txtSearch, cmbSearch, cmbStatus);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
- });
+           bntSearch.addActionListener(e -> {
+                try {
+                    String selectedColumn = cmbSearch.getSelectedItem().toString();
+                    String keyword = txtSearch.getText().trim();
+                    String statusFilter = cmbStatus.getSelectedItem().toString();
+                     busCustomer= new BusCustomer();
+                    // Gọi BUS để lấy danh sách khách hàng đã lọc
+                    List<DTOCustomer> resultList = busCustomer.searchCustomer(selectedColumn, keyword, statusFilter);
+
+                    // Xóa dữ liệu cũ
+                    model.setRowCount(0); 
+
+                    // Hiển thị dữ liệu mới
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+                    for (DTOCustomer customer : resultList) {
+                        model.addRow(new Object[] {
+                            customer.getCustomerID(),
+                            customer.getFullName(),
+                            customer.getGender(),
+                            customer.getDateOfBirth() != null ? sdf.format(customer.getDateOfBirth()) : "",
+                            customer.getEmail(),
+                            customer.getContact(),
+                            customer.getAddress(),
+                            customer.getStatus()
+                        });
+                    }
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "Lỗi khi tìm kiếm khách hàng: " + ex.getMessage());
+                }
+            });
+
 
             panelSearch.add(bntSearch);
             panel.add(panelSearch);
@@ -173,7 +217,7 @@ public class Form_Customer extends JPanel {
             bntRefresh.setForeground(Color.BLACK);
             bntRefresh.setButtonIcon("D:\\Đồ án Java\\Quanlybanhang\\src\\main\\resources\\Icons\\Admin_icon\\refresh.png", 25, 25, 10, SwingConstants.RIGHT, SwingConstants.CENTER);
             bntRefresh.addActionListener((ActionEvent e) -> {
-                control.refreshCustomerData(); // Gọi phương thức refresh
+                refreshForm();
         });
             panel.add(bntRefresh);
             
@@ -185,27 +229,46 @@ public class Form_Customer extends JPanel {
             bntDelete.setFont(new Font("sansserif", Font.BOLD, 18));
             bntDelete.setForeground(Color.BLACK);
             bntDelete.setButtonIcon("D:\\Đồ án Java\\Quanlybanhang\\src\\main\\resources\\Icons\\Admin_icon\\delete.png", 25, 25, 10, SwingConstants.RIGHT, SwingConstants.CENTER);
-            bntDelete.addActionListener((ActionEvent e) -> {
-               int selectedRow = Customner.getSelectedRow();
-               if (selectedRow != -1) {
-                   String customerID = Customner.getValueAt(selectedRow, 0).toString();
-                   String fullName = control.getCustomerNameByID(customerID);
-                   boolean confirm = CustomDialog.showOptionPane(
-                           "Confirm Deletion",
-                           "Are you sure you want to delete customer: " + fullName + "?",
-                           UIManager.getIcon("OptionPane.questionIcon"),
-                           Color.decode("#FF6666")
-                   );
-                   
-                   if (confirm) {
-                       control.deleteCustomer(customerID);
-                       CustomDialog.showSuccess("Successfully deleted customer " + fullName + "!");
-                   }
-                   
-               } else {
-                   CustomDialog.showError("Please select a customer to delete!");
-               }
-        });
+            bntDelete.addActionListener(e -> {
+                int selectedRow = Customner.getSelectedRow();
+                if (selectedRow == -1) {
+                    CustomDialog.showError("Please choose a customer to delete!");
+                    return;
+                }
+
+                busCustomer = new BusCustomer();
+                String customerID = Customner.getValueAt(selectedRow, 0).toString(); // Cột 0 là Customer.ID
+                String fullName = busCustomer.getCustomerNameByID(customerID);
+
+                boolean confirm = CustomDialog.showOptionPane(
+                        "Confirm Deletion",
+                        "Are you sure you want to delete customer: " + fullName + "?",
+                        UIManager.getIcon("OptionPane.questionIcon"),
+                        Color.decode("#FF6666")
+                );
+
+                if (confirm) {
+                    try {
+                        busCustomer = new BusCustomer();
+                        boolean isDeleted = busCustomer.delete(customerID);
+
+
+                        if (isDeleted) {
+                            model.setRowCount(0);
+                            loadCustomerData(model);
+                            Customner.adjustColumnWidths();
+                            CustomDialog.showSuccess("Successfully deleted customer " + fullName + "!");
+                        } else {
+                            System.out.println("DEBUG: Deletion failed, customer might not exist.");
+                            CustomDialog.showError("Delete failure! Customer may not exist or an issue occurred.");
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        CustomDialog.showError("Error while deleting customer: " + ex.getMessage());
+                    }
+                }
+            });
+
 
            panel.add(bntDelete);
             
@@ -217,8 +280,9 @@ public class Form_Customer extends JPanel {
            bntExportfile.setFont(new Font("sansserif", Font.BOLD, 18));
            bntExportfile.setForeground(Color.BLACK);
            bntExportfile.setButtonIcon("D:\\Đồ án Java\\Quanlybanhang\\src\\main\\resources\\Icons\\Admin_icon\\Excel.png", 30, 30, 10, SwingConstants.RIGHT, SwingConstants.CENTER);
-           bntExportfile.addActionListener((ActionEvent e) -> {
-               control.exportFile(Customner); // Customner là JTable
+          bntExportfile.addActionListener((ActionEvent e) -> {
+              busCustomer= new BusCustomer();
+              busCustomer.exportFile(Customner);
         });
 
            panel.add(bntExportfile);
@@ -233,8 +297,14 @@ public class Form_Customer extends JPanel {
            bntUpdate.setForeground(Color.BLACK);
            bntUpdate.setButtonIcon("D:\\Đồ án Java\\Quanlybanhang\\src\\main\\resources\\Icons\\Admin_icon\\update.png", 25, 25, 10, SwingConstants.RIGHT, SwingConstants.CENTER);
            bntUpdate.addActionListener(e -> {
-            control.update(Customner, cmbStatus);
-        });
+                busCustomer = new BusCustomer();
+                busCustomer.update(Customner, cmbStatus);
+
+                model.setRowCount(0);  // 👈 Xóa dữ liệu cũ khỏi bảng
+                loadCustomerData(model);  // 👈 Tải lại dữ liệu mới
+                Customner.adjustColumnWidths(); // 👈 Cập nhật lại chiều rộng cột
+      });
+
            panel.add(bntUpdate);
            panelSearch.repaint();
            panelSearch.revalidate();
@@ -243,14 +313,42 @@ public class Form_Customer extends JPanel {
            this.revalidate();          
      
    }
-//        @Override
-//            public void addNotify() {
-//                super.addNotify();
-//                SwingUtilities.invokeLater(() -> {
-//                    this.revalidate();
-//                    this.repaint();
-//                });
-//            }
+ 
+        // 3️⃣ Load dữ liệu từ BUS vào model
+     private void loadCustomerData(DefaultTableModel model) {
+         BusCustomer bus = new BusCustomer(); // Khởi tạo lớp BUS
+         List<DTOCustomer> customerList = bus.getAllCustomers(); // Lấy danh sách khách hàng
+
+         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+
+         for (DTOCustomer customer : customerList) {
+             Object[] row = new Object[]{
+                 customer.getCustomerID(),
+                 customer.getFullName(),
+                 customer.getGender(),
+                 customer.getDateOfBirth() != null ? sdf.format(customer.getDateOfBirth()) : "",
+                 customer.getEmail(),
+                 customer.getContact(),
+                 customer.getAddress(),
+                 customer.getStatus()
+             };
+             model.addRow(row); // Thêm dòng vào model
+         }
+     }
+     public void refreshForm() {
+        if (model != null) {
+            model.setRowCount(0); // Xóa dữ liệu cũ trong bảng
+            loadCustomerData(model); // Load lại dữ liệu từ DB
+        } else {
+            System.err.println("Model is null - chưa được khởi tạo");
+        }
+
+        // Reset các combo box
+        if (cmbStatus != null) cmbStatus.setSelectedIndex(0);
+        if (cmbSearch != null) cmbSearch.setSelectedIndex(0);
+    }
+
+   
 }
 
 

@@ -7,8 +7,9 @@ import com.ComponentandDatabase.Components.MyButton;
 import java.awt.CardLayout;
 import java.awt.Font;
 import java.awt.Color;
-import com.ComponentandDatabase.Database_Connection.DatabaseConnection;
-import com.User.login_user.Control_User.ControlRegister_User;
+import java.util.Date;
+import com.User.login_user.BUS.BusAccount_cus;
+import com.User.login_user.DTO.DTOAccount_cus;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
@@ -18,6 +19,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import com.User.dashboard_user.GUI.Dashboard_user;
 import java.sql.*;
 import com.toedter.calendar.JDateChooser;
 
@@ -30,14 +32,14 @@ public class PanelLoginandRegister_User extends javax.swing.JLayeredPane {
     private JRadioButton rdoFemale;
     private JDateChooser dateOfBirth;
     private MyTextField txtEmail;
-    private MyTextField txtEmailLogin;
+    public static MyTextField txtEmailLogin;
     private MyTextField txtContact;
     private JTextArea txtAddress;
     private MyTextField txtPassword;
     private MyTextField txtPasswordLogin;
     private ButtonGroup genderGroup;
-    private DatabaseConnection db;
-    private ControlRegister_User ControlRegister;
+
+    private BusAccount_cus busAccount;
     private CustomDialog cs;
     private static int mouseX, mouseY; // Biến lưu vị trí chuột
 
@@ -247,17 +249,24 @@ public class PanelLoginandRegister_User extends javax.swing.JLayeredPane {
         signup.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ControlRegister = new ControlRegister_User();
-                ControlRegister.registerCustomer(
-                    txtIDCard.getText().trim(),
-                    txtFullName.getText().trim(),
-                    rdoMale.isSelected() ? "Male" : (rdoFemale.isSelected() ? "Female" : ""),
-                    dateOfBirth.getDate(),
-                    txtContact.getText().trim(),
-                    txtAddress.getText().trim(),
-                    txtEmail.getText().trim(),
-                    txtPassword.getPasswordText().trim()
-                );
+                busAccount= new BusAccount_cus();
+                String idCard = txtIDCard.getText().trim();
+                String fullName = txtFullName.getText().trim();
+                String gender = rdoMale.isSelected() ? "Male" : (rdoFemale.isSelected() ? "Female" : "");
+                        // Kiểm tra ngày sinh
+                java.util.Date utilDob = dateOfBirth.getDate();
+                if (utilDob == null) {
+                    CustomDialog.showError("Please fill in all required fields! ");
+                    return; // Dừng sự kiện nếu ngày sinh không hợp lệ
+                }
+                java.sql.Date sqlDob = new java.sql.Date(utilDob.getTime());
+                String email = txtEmail.getText().trim();
+                String contact = txtContact.getText().trim();
+                String address = txtAddress.getText().trim();
+                String password = txtPassword.getPasswordText().trim();
+                String status = "Inactive";
+                DTOAccount_cus DTOAccount= new DTOAccount_cus(idCard, fullName, gender, sqlDob, email, contact, address, password, status);
+                busAccount.registerCustomer(DTOAccount);
 
             }
         });
@@ -323,6 +332,24 @@ public class PanelLoginandRegister_User extends javax.swing.JLayeredPane {
         forget.setFont(new Font("Times New Roman", Font.BOLD | Font.ITALIC, 16));
 
         forget.setForeground(new Color(0, 150, 136)); // Màu chữ xanh đậm để dễ nhìn
+        forget.addActionListener((e) -> {
+            String email= txtEmailLogin.getText().strip();
+            
+            if (email.isEmpty()) {
+              CustomDialog.showError("Please enter your Email before proceeding!");
+                return; // không thực hiện tiếp
+            }
+
+            busAccount = new BusAccount_cus();
+            String sentOtp = busAccount.sentOTP(email);
+
+            if (sentOtp != null) {
+                OTPFrame_cus OTP = new OTPFrame_cus();
+                OTP.setVisible(true);
+            } else {
+                CustomDialog.showError("Failed to send OTP. Please check your Email or try again later.");
+            }
+        });
 
         // Thêm vào panel
         login.add(forget);
@@ -335,6 +362,28 @@ public class PanelLoginandRegister_User extends javax.swing.JLayeredPane {
         signin.setBounds(130, 480, 230, 35);
         signin.setFont(new Font("Times New Roman", Font.BOLD, 18));
         signin.setForeground(Color.WHITE);
+
+        // Khi nhấn vào nút
+        signin.addActionListener((e) -> {
+            String email = txtEmailLogin.getText().strip();
+            String password = txtPasswordLogin.getPasswordText().strip();
+
+           busAccount = new BusAccount_cus();  // ✅ Tạo BUS mới
+
+            DTOAccount_cus account = busAccount.login(email, password);  // ✅ Gọi login
+            if (account != null) {
+                String fullName = busAccount.getName();  // ✅ Lấy tên từ BUS
+                CustomDialog.showSuccess("Welcome " + fullName + "!");
+                
+                JFrame Login_User = (JFrame) SwingUtilities.getWindowAncestor(signin);
+                Login_User.setVisible(false); // hoặc dispose nếu không cần
+                
+                Dashboard_user dashboard= new Dashboard_user();
+                dashboard.setVisible(true);
+            }
+            // Nếu account == null thì đã có CustomDialog lỗi bên trong BUS rồi
+        });
+        
         login.add(signin);
  
     }

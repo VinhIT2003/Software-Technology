@@ -155,45 +155,21 @@ public class Form_Product extends JPanel  implements ProductUpdateObserver {
               return;
           }
 
+          busProduct= new BusProduct();
           // 2. Lấy Product_ID từ dòng được chọn
           String productID = tableProduct.getValueAt(selectedRow, 0).toString();
 
           // 3. Gọi phương thức getProductById() từ DAO/Service
           DTOProduct product = busProduct.getProductById(productID);
           if (product == null) {
-              JOptionPane.showMessageDialog(null, "Không tìm thấy thông tin sản phẩm", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            CustomDialog.showError("Product information is not found !");
               return;
           }
 
           // 4. Tạo và thiết lập form Edit
           EditProduct editFrame = new EditProduct();
 
-          // Thiết lập các giá trị từ DTOProduct
-          editFrame.txtProductID.setText(product.getProductID());
-          editFrame.txtProductName.setText(product.getProductName());
-          editFrame.txtPrice.setText(product.getPrice().toString());
-          editFrame.spinnerQuantity.setValue(product.getQuantity());
-          editFrame.spinderBrokenQuantity.setValue(product.getSpoiledQuantity());
-          editFrame.menu.setText(product.getCategoryID());
-          editFrame.txtwaranty.setText(product.getWarrantyPeriod());
-
-          // Thiết lập CPU, RAM, Graphics Card nếu có
-          editFrame.txtCPU.setText(product.getCpu() != null ? product.getCpu() : "");
-          editFrame.txtRam.setText(product.getRam() != null ? product.getRam() : "");
-          editFrame.txtCard.setText(product.getGraphicsCard() != null ? product.getGraphicsCard() : "");
-
-          // Thiết lập hệ điều hành từ CSDL
-          if (product.getOperatingSystem() != null) {
-              editFrame.cmbOperate.setSelectedItem(product.getOperatingSystem());
-          } else {
-              editFrame.cmbOperate.setSelectedItem("Windows"); // Giá trị mặc định
-          }
-
-          // Thiết lập ảnh sản phẩm nếu có
-          if (product.getImage() != null && !product.getImage().isEmpty()) {
-              // Gọi phương thức hiển thị ảnh trong EditProduct
-              editFrame.displayProductImage(product.getImage());
-          }
+         editFrame.showDetail(product);
 
           // 5. Hiển thị form
           editFrame.setVisible(true);

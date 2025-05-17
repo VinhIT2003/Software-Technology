@@ -1,7 +1,4 @@
-
 package com.Admin.login.GUI;
-
-//import com.Admin.component.PanelCover;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.UIManager;

@@ -65,4 +65,16 @@ public class DTOCategory {
     public void setContact(String contact) {
         this.contact = contact;
     }
+    
+    @Override
+    public String toString() {
+        return "DTO_Category{" +
+               "categoryID='" + categoryID + '\'' +
+               ", categoryName='" + categoryName + '\'' +
+               ", supID='" + supID + '\'' +
+               ", supName='" + supName + '\'' +
+               ", address='" + address + '\'' +
+               ", contact='" + contact + '\'' +
+               '}';
+    }
 }

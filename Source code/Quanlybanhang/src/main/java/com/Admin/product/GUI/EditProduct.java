@@ -189,6 +189,7 @@ public class EditProduct extends javax.swing.JFrame {
           bg.add(lblProductID, "pos 255 60, w 150!, h 50!");
 
           txtProductID = new MyTextField();
+          txtProductID.setLocked(true);
           txtProductID.setBorder(BorderFactory.createLineBorder(Color.GRAY, 2));
           txtProductID.setTextFont(new Font("Times new roman", Font.PLAIN, 16));
           txtProductID.setBackgroundColor(Color.decode("#F0FFFF"));
@@ -506,6 +507,37 @@ public class EditProduct extends javax.swing.JFrame {
        }
        
  
+    public void showDetail(DTOProduct product) {
+          txtProductID.setText(product.getProductID());
+          txtProductName.setText(product.getProductName());
+          txtPrice.setText(product.getPrice().toString());
+          spinnerQuantity.setValue(product.getQuantity());
+          menu.setText(product.getCategoryID());
+          txtwaranty.setText(product.getWarrantyPeriod());
+
+          // Thiết lập CPU, RAM, Graphics Card nếu có
+          txtCPU.setText(product.getCpu() != null ? product.getCpu() : "");
+          txtRam.setText(product.getRam() != null ? product.getRam() : "");
+          txtCard.setText(product.getGraphicsCard() != null ? product.getGraphicsCard() : "");
+
+          // Thiết lập hệ điều hành từ CSDL
+          if (product.getOperatingSystem() != null) {
+             cmbOperate.setSelectedItem(product.getOperatingSystem());
+          } else {
+              cmbOperate.setSelectedItem("Windows"); // Giá trị mặc định
+          }
+
+          // Thiết lập ảnh sản phẩm nếu có
+          if (product.getImage() != null && !product.getImage().isEmpty()) {
+              // Gọi phương thức hiển thị ảnh trong EditProduct
+              displayProductImage(product.getImage());
+          }
+
+    }     
+       
+       
+       
+       
     public void displayProductImage(String imagePath) {
         SwingUtilities.invokeLater(() -> {
             try {
@@ -591,6 +623,10 @@ public class EditProduct extends javax.swing.JFrame {
             panelUpload.revalidate();
             panelUpload.repaint();
         }
+        
+        
+        
+       
             @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
     private void initComponents() {
