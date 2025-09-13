@@ -127,7 +127,7 @@ public class ControlLogin {
 
     private boolean sendEmail(String toEmail, String otp) {
         final String fromEmail = "zquangvinh359@gmail.com";
-        final String password = "trwa fmjj zlad vtdg";
+        final String password = "";
 
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
