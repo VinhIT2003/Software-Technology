@@ -126,7 +126,7 @@ public class ControlLogin {
 
 
     private boolean sendEmail(String toEmail, String otp) {
-        final String fromEmail = "zquangvinh359@gmail.com";
+        final String fromEmail = "";
         final String password = "";
 
         Properties props = new Properties();
